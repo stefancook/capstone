@@ -4,7 +4,7 @@ var $grid = $('.grid').isotope({
   getSortData: {
     name: '.name',
     fname: '.fname',
-    number: '.number parseInt',
+    number: '.number',
     category: '[data-category]',
     weight: function( itemElem ) {
       var weight = $( itemElem ).find('.weight').text();
@@ -45,19 +45,54 @@ var $grid = $('.grid').isotope({
 var $quicksearch = $('.quicksearch').keyup( debounce( function() {
   qsRegex = new RegExp( $quicksearch.val(), 'gi' );
   $grid.isotope();
+}, 400 ) );
+
+// debounce so filtering doesn't happen every millisecond
+function debounce( fn, threshold ) {
+  var timeout;
+  threshold = threshold || 100;
+  return function debounced() {
+    clearTimeout( timeout );
+    var args = arguments;
+    var _this = this;
+    function delayed() {
+      fn.apply( _this, args );
+    }
+    timeout = setTimeout( delayed, threshold );
+  };
+}
+
+////
+
+// quick search regex
+var qsRegex;
+
+// init Isotope
+var $grid = $('.grid').isotope({
+  itemSelector: '.element-item',
+  layoutMode: 'fitRows',
+  filter2: function() {
+    return qsRegex ? $(this).text().match( qsRegex ) : true;
+  }
+});
+
+// use value of search field to filter
+var $quicksearch2 = $('.quicksearch2').keyup( debounce( function() {
+  qsRegex = new RegExp( $quicksearch.val(), 'gi' );
+  $grid.isotope();
 }, 200 ) );
 
 // debounce so filtering doesn't happen every millisecond
 function debounce( fn, threshold ) {
   var timeout;
+  threshold = threshold || 100;
   return function debounced() {
-    if ( timeout ) {
-      clearTimeout( timeout );
-    }
+    clearTimeout( timeout );
+    var args = arguments;
+    var _this = this;
     function delayed() {
-      fn();
-      timeout = null;
+      fn.apply( _this, args );
     }
-    timeout = setTimeout( delayed, threshold || 100 );
-  }
+    timeout = setTimeout( delayed, threshold );
+  };
 }
